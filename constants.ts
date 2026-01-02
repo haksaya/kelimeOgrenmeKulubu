@@ -1,7 +1,7 @@
 
 // Supabase Configuration
-export const SUPABASE_URL = "https://neecriiqtnzqdipjhwhe.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_80UGdDDJaitPJIeqLSWQWw_DlE_by1g";
+export const SUPABASE_URL = "https://aebsnufnogmjicpriezc.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlYnNudWZub2dtamljcHJpZXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4NTI4MzEsImV4cCI6MjA4MTQyODgzMX0.Ew7IaWHMWjUTrtf8mahMTWss34sQIZeQDrJKeuUxwMY";
 
 // --- AVATAR CONFIGURATION ---
 // DiceBear "Initials" API with a consistent true yellow background.
