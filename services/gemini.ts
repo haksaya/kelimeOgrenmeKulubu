@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIWordAnalysis, QuizQuestion } from "../types";
 
-const apiKey = process.env.API_KEY || ''; // Must be set in env
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ''; // Must be set in .env
 const ai = new GoogleGenAI({ apiKey });
 
 export const geminiService = {
