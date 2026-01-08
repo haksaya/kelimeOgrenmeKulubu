@@ -10,6 +10,9 @@ interface WordManagerProps {
 
 export const WordManager: React.FC<WordManagerProps> = ({ user }) => {
   const [newWord, setNewWord] = useState('');
+  const [newTranslation, setNewTranslation] = useState('');
+  const [newExample, setNewExample] = useState('');
+  const [newExampleTr, setNewExampleTr] = useState('');
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -26,25 +29,31 @@ export const WordManager: React.FC<WordManagerProps> = ({ user }) => {
   const handleAddWord = async () => {
     if (!newWord.trim()) return;
     setAnalyzing(true);
-
     try {
-      // 1. Get AI Analysis
-      const analysis = await geminiService.analyzeWord(newWord);
-
-      // 2. Add to DB
+      // Manuel giriş öncelikli, boşsa AI'dan doldur
+      let turkish = newTranslation;
+      let example = newExample;
+      let example_turkish = newExampleTr;
+      if (!turkish || !example || !example_turkish) {
+        const analysis = await geminiService.analyzeWord(newWord);
+        if (!turkish) turkish = analysis.turkish;
+        if (!example) example = analysis.example;
+        if (!example_turkish) example_turkish = analysis.example_turkish;
+      }
       const wordEntry: Partial<Word> = {
         user_id: user.id,
         english: newWord,
-        turkish: analysis.turkish,
-        example_sentence: analysis.example,
-        example_turkish: analysis.example_turkish,
+        turkish,
+        example_sentence: example,
+        example_turkish,
         status: 'new'
       };
-
       await api.addWord(wordEntry);
-      
       setNewWord('');
-      await loadWords(); // Refresh
+      setNewTranslation('');
+      setNewExample('');
+      setNewExampleTr('');
+      await loadWords();
     } catch (error) {
       alert("Kelime eklenirken hata oluştu.");
     } finally {
@@ -102,26 +111,46 @@ export const WordManager: React.FC<WordManagerProps> = ({ user }) => {
       <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-3xl p-8 text-white shadow-xl shadow-yellow-500/20">
         <h2 className="text-2xl font-bold mb-4">Yeni Kelime Öğren</h2>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
+          <div className="flex-1 relative space-y-2">
             <input
               type="text"
               value={newWord}
               onChange={(e) => setNewWord(e.target.value)}
               placeholder="İngilizce kelime yaz..."
-              className="w-full p-4 rounded-xl text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-yellow-300/50 shadow-inner"
+              className="w-full p-4 rounded-xl text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-yellow-300/50 shadow-inner mb-2"
               onKeyDown={(e) => e.key === 'Enter' && handleAddWord()}
+            />
+            <input
+              type="text"
+              value={newTranslation}
+              onChange={(e) => setNewTranslation(e.target.value)}
+              placeholder="Türkçe çeviri (isteğe bağlı)"
+              className="w-full p-3 rounded-xl text-gray-800 placeholder-gray-400 border-none focus:ring-2 focus:ring-yellow-200/50 shadow-inner mb-2"
+            />
+            <input
+              type="text"
+              value={newExample}
+              onChange={(e) => setNewExample(e.target.value)}
+              placeholder="İngilizce örnek cümle (isteğe bağlı)"
+              className="w-full p-3 rounded-xl text-gray-800 placeholder-gray-400 border-none focus:ring-2 focus:ring-yellow-200/50 shadow-inner mb-2"
+            />
+            <input
+              type="text"
+              value={newExampleTr}
+              onChange={(e) => setNewExampleTr(e.target.value)}
+              placeholder="Türkçe örnek cümle (isteğe bağlı)"
+              className="w-full p-3 rounded-xl text-gray-800 placeholder-gray-400 border-none focus:ring-2 focus:ring-yellow-200/50 shadow-inner"
             />
             {analyzing && <Loader2 className="absolute right-4 top-4 animate-spin text-yellow-500" />}
           </div>
           <button 
             onClick={handleAddWord}
             disabled={analyzing}
-            className="bg-white text-yellow-600 font-bold px-8 py-4 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center"
+            className="bg-white text-yellow-600 font-bold px-8 py-4 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center self-end"
           >
             {analyzing ? 'Analiz Ediliyor...' : <><Plus className="mr-2" /> Ekle</>}
           </button>
-          
-          <label className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-4 rounded-xl shadow-md cursor-pointer transition-colors flex items-center justify-center">
+          <label className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-4 rounded-xl shadow-md cursor-pointer transition-colors flex items-center justify-center self-end">
             <Upload className="mr-2" /> Dosya Yükle (.txt)
             <input type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
           </label>
